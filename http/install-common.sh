@@ -3,10 +3,14 @@
 set -e
 set -x
 
+
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 sed -i -e 's/^#\(en_US.UTF-8\)/\1/' /etc/locale.gen
 locale-gen
 echo 'LANG=en_US.UTF-8' >/etc/locale.conf
+
+sed -i 's/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block lvm2 filesystems keyboard fsck)/' /etc/mkinitcpio.conf
+mkinitcpio -p linux
 
 # setting the user credentials
 echo -e "${NEWUSER}\n${NEWUSER}" | passwd
@@ -88,9 +92,12 @@ if [ -b "/dev/sda" ]; then
 elif [ -b "/dev/vda" ]; then
   grub-install /dev/vda
 fi
-sed -i -e 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=1/' /etc/default/grub
+
 # setup unpredictable kernel names
+sed -i -e 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=1/' /etc/default/grub
 sed -i -e 's/^GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX="net.ifnames=0"/' /etc/default/grub
+sed -i 's/GRUB_PRELOAD_MODULES="part_gpt part_msdos"/GRUB_PRELOAD_MODULES="part_gpt part_msdos lvm2"/' /etc/default/grub
+
 grub-mkconfig -o /boot/grub/grub.cfg
 
 if declare -f post >/dev/null; then
