@@ -40,6 +40,8 @@ Name=eth0
 
 [Network]
 DHCP=ipv4
+DNS=1.1.1.1
+DNS=1.0.0.1
 EOF
 
 # Setup pacman-init.service for clean pacman keyring initialization
